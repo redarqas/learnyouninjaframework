@@ -16,33 +16,72 @@
 
 package controllers;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import ninja.FilterWith;
 import ninja.Result;
 import ninja.Results;
+import ninja.appengine.AppEngineFilter;
+import ninja.params.PathParam;
+import ninja.utils.NinjaProperties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import services.urlfetch.FetchableUrl;
+
+import com.google.appengine.api.urlfetch.HTTPResponse;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-
 @Singleton
-public class ApplicationController {
+@FilterWith(AppEngineFilter.class)
+public class ApplicationController
+{
 
-    public Result index() {
+  private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
 
-        return Results.html();
+  @Inject
+  private FetchableUrl urlFetcher;
 
-    }
-    
-    public Result helloWorldJson() {
-        
-        SimplePojo simplePojo = new SimplePojo();
-        simplePojo.content = "Hello World! Hello Json!";
+  @Inject
+  private NinjaProperties ninjaProperties;
 
-        return Results.json().render(simplePojo);
+  public Result pullHeadlines()
+  {
+    //TODO : Headlines 
+    final String url = ninjaProperties.get("metro.rss.xml.mobile.url");
+    final String encoding = ninjaProperties.get("app.defaultencoding");
+    final Map<String, Object> params = new LinkedHashMap<String, Object>();
+    params.put("path", "/");
+    final HTTPResponse response = urlFetcher.createCall(url, encoding).setParameters(params).get();
+    //TODO : serve it as xml not text
+    return Results.xml().render("ok");
+  }
 
-    }
-    
-    public static class SimplePojo {
+  public Result index()
+  {
+    return Results.html();
+  }
 
-        public String content;
-        
-    }
+  public Result helloWorldJson()
+  {
+    SimplePojo simplePojo = new SimplePojo();
+    simplePojo.content = "Hello World! Hello Json!";
+    return Results.json().render(simplePojo);
+  }
+
+  public Result userDashbord(@PathParam("id") String id)
+  {
+    System.out.println("DOkakakak");
+
+    return Results.json().render(id);
+  }
+
+  public static class SimplePojo
+  {
+    public String content;
+  }
+
 }

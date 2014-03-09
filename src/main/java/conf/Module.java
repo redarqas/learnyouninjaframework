@@ -16,17 +16,21 @@
 
 package conf;
 
+import services.urlfetch.FetchableUrl;
+import services.urlfetch.UrlFetcher;
+import ninja.appengine.AppEngineModule;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
 @Singleton
-public class Module extends AbstractModule {
-    
-
-    protected void configure() {
-        
-        // bind your injections here!
-        
-    }
-
+public class Module
+    extends AbstractModule
+{
+  protected void configure()
+  {
+    install(new AppEngineModule());
+    bind(StartupActions.class);
+    bind(FetchableUrl.class).to(UrlFetcher.class);
+  }
 }
